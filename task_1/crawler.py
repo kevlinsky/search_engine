@@ -4,11 +4,13 @@ import requests
 from requests import HTTPError
 import validators
 import os
+from urllib.parse import urlparse
 
 
 class Crawler:
     def __init__(self, start_page_url: str):
         self.start_page_url = start_page_url
+        self.host_name = urlparse(self.start_page_url).hostname
         self.page_files_count = 0
         self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.__init_pages_list_file()
@@ -20,7 +22,7 @@ class Crawler:
             os.remove(os.path.join(dir, file))
 
     def __init_pages_list_file(self):
-        with open(os.path.join(self.base_dir, '1st_task/pages_list.txt'), 'w') as file:
+        with open(os.path.join(self.base_dir, 'task_1/pages_list.txt'), 'w') as file:
             file.write('')
 
     def __save_page(self, text: str):
@@ -29,7 +31,7 @@ class Crawler:
         self.page_files_count += 1
 
     def __save_url(self, url: str):
-        with open(os.path.join(self.base_dir, '1st_task/pages_list.txt'), 'a') as file:
+        with open(os.path.join(self.base_dir, 'task_1/pages_list.txt'), 'a') as file:
             file.write(f'[{self.page_files_count + 1}] {url}\n')
 
     def __get(self, url: str) -> str:
@@ -44,8 +46,10 @@ class Crawler:
             return raw_html
         except HTTPError as http_err:
             print(f'HTTP error occurred: {http_err}')
+            return ''
         except Exception as err:
             print(f'Other error occurred: {err}')
+            return ''
 
     def __get_links(self, soup: BeautifulSoup) -> List[str]:
         links = []
@@ -58,11 +62,11 @@ class Crawler:
                 href = href[1:]
             href_with_base = self.start_page_url + href
 
-            if validators.url(href):
+            if validators.url(href) and self.host_name in href:
                 links.append(href)
                 continue
 
-            if validators.url(href_with_base):
+            if validators.url(href_with_base) and self.host_name in href_with_base:
                 links.append(href_with_base)
 
         return links
@@ -98,5 +102,5 @@ class Crawler:
 
 
 if __name__ == '__main__':
-    crawler = Crawler('https://cyberleninka.ru/')
+    crawler = Crawler('https://meduza.io/')
     crawler.collect(100, 4)

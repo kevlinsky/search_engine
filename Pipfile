@@ -8,6 +8,10 @@ bs4 = "*"
 requests = "*"
 lxml = "*"
 validators = "*"
+nltk = "*"
+justext = "*"
+pymorphy2 = "*"
+boolean-parser = "*"
 
 [dev-packages]
 
